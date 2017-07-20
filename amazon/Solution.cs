@@ -84,23 +84,24 @@ namespace amazon
         {
             // technically we should use stringbuilder for this... it's better performing.
             // one item you'll notice different in the regex pattern is it's very flat, and only uses alternation within the optional groups.
-            string re = "";
+            StringBuilder sb = new StringBuilder();// re = "";
+            sb.Append("^");
             for (int i= N.Length-1; i>=0;i--)
             {
                 if (i==0)
                     //< ones only occur in sequence up to 3
-                    re += string.Format("(?<{0}>{0}{{1,3}})?", N[0]); 
+                    sb.AppendFormat("(?<{0}>{0}{{1,3}})?", N[0]); 
                 else if (i % 2 == 0)
                     // captures CMM,MCM, MMMCM and other subtractive formats (yes it treats two separate terms as one, MMM + CM, they sum up the same, so this is safe.)
                     // if we can stack more than 3, we will need to refactor this regex template. 
                     // come up with a way of programmatically come up with the variations.
-                    re += string.Format("(?<{1}>({0}{1}{{1,3}}|{1}{0}{1}{{1,2}}|({1}{{1,3}}({0}{1})?)))?", N[i - 2], N[i]);
+                    sb.AppendFormat("(?<{1}>({0}{1}{{1,3}}|{1}{0}{1}{{1,2}}|({1}{{1,3}}({0}{1})?)))?", N[i - 2], N[i]);
                 else if (i % 2 == 1)
                     // fives based subtractive
-                    re += string.Format("(?<{1}>{0}?{1}{{1,1}})?", N[i - 1], N[i]);
+                    sb.AppendFormat("(?<{1}>{0}?{1}{{1,1}})?", N[i - 1], N[i]);
             }
-
-            return "^" +re+"$";
+            sb.Append("$");
+            return sb.ToString();
         }
     }
 }

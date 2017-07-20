@@ -23,7 +23,6 @@ namespace amazon.Tests
         [InlineData("CCVII", 207)]
         [InlineData("CCCVIII", 308)]
         [InlineData("XXXVIII", 38)]
-        // [InlineData("XXXIX", 38)] //FAILS. Need to revisit regex
         [InlineData("I", 1)]
         [InlineData("II", 2)]
         [InlineData("III", 3)]

@@ -51,32 +51,13 @@ namespace amazon
                     var v = m.Groups[gIdx].Value;
                     switch(v.Length)
                     {
-                        // this seems like this logic could be simplified some.
-                        // i'll tinker with that in the morning...
                         case 0: /*skip the item*/break;
                         case 1: sum += lt[v[0]]; break;
-                        case 2: // subtractive or double stacked
-                            if (lt[v[0]] < lt[v[1]]) sum += (lt[v[1]] - lt[v[0]]);
-                            else sum += 2 * lt[v[0]];
-                            break;
-                        case 3: // 3 stacked or 2 stacked and subtractive
-                            if (v[0] == v[1] && v[1] == v[2])
-                            {
-                                sum += 3 * lt[v[0]];
-                            }
-                            else
+                        default: // subtractive or just stacked, handles an arbitrary number of numerals
                             {
                                 var vv = v.ToCharArray().ToList();
                                 vv.Sort(new Comparison<char>((l, r) => lt[l] - lt[r]));
-                                sum -= lt[vv[0]];
-                                sum += lt[vv[1]] * (vv.Count - 1);
-                            }
-                            break;
-                        default: // subtractive and 3 stacked ... or more.
-                            {
-                                var vv = v.ToCharArray().ToList();
-                                vv.Sort(new Comparison<char>((l, r) => lt[l] - lt[r]));
-                                sum -= lt[vv[0]];
+                                sum += (lt[vv[0]] < lt[vv[1]]) ? -lt[vv[0]] : lt[vv[0]];
                                 sum += lt[vv[1]] * (vv.Count - 1);
                             }
                             break;

@@ -15,7 +15,7 @@ namespace amazon
             correct = s.FromRoman("CMMLXXI") == 1971;
             correct = s.FromRoman("CCVII") == 207;
             correct = s.FromRoman("CCCVII") == 307;
-            correct = s.FromRoman("") == 0;
+            try { s.FromRoman(""); } catch { int i = 0; }
             try { s.FromRoman("IL"); } catch { int i = 0; }
             try { s.FromRoman("IM"); } catch { int i = 0; }
             try { s.FromRoman("XM"); } catch { int i = 0; }

@@ -32,11 +32,11 @@ namespace amazon
         {
             rn = rn.ToUpperInvariant();
             int sum = 0;
-            char[] numerals;
-            var lt=BuildLookupTable(out numerals);
+            char[] baseNumerals;
+            var numeralValue=BuildLookupTable(out baseNumerals);
 
-            string re = MakeNumberParser(numerals);
-            Regex regex = new Regex(re, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            string expr = MakeNumberParser(baseNumerals);
+            Regex regex = new Regex(expr, RegexOptions.IgnoreCase | RegexOptions.Compiled);
             if (string.IsNullOrWhiteSpace(rn) || !regex.IsMatch(rn)) throw new Exception("Invalid Roman Numeral"); //TODO: localize this text.
 
             MatchCollection mc = regex.Matches(rn);
@@ -48,16 +48,17 @@ namespace amazon
                     switch (v.Length)
                     {
                         case 0: /*skip the item, group with no matches. safe to ignore.*/ break;
-                        case 1: sum += lt[v[0]]; break;
+                        case 1: sum += numeralValue[v[0]]; break;
                         default: // subtractive or just stacked, handles an arbitrary number of numerals
                             {
-                                var vv = v.ToCharArray().ToList();
+                                var numerals = v.ToCharArray().ToList();
                                 // sort acending according to the lookup table.
-                                vv.Sort(new Comparison<char>((l, r) => lt[l] - lt[r]));
+                                numerals.Sort(new Comparison<char>((l, r) => numeralValue[l] - numeralValue[r]));
                                 // subtract/add the first numeral.
-                                sum += (lt[vv[0]] < lt[vv[1]]) ? -lt[vv[0]] : lt[vv[0]];
+                                // if the first item is less than the second it's a subtraction. Otherwise it's an add.
+                                sum += (numeralValue[numerals[0]] < numeralValue[numerals[1]]) ? -numeralValue[numerals[0]] : numeralValue[numerals[0]];
                                 // add the remaining numerals
-                                sum += lt[vv[1]] * (vv.Count - 1);
+                                sum += numeralValue[numerals[1]] * (numerals.Count - 1);
                             }
                             break;
                     }
@@ -68,13 +69,13 @@ namespace amazon
 
         private static Dictionary<char, int> BuildLookupTable(out char[] numerals)
         {
-            var lt= new Dictionary<char, int>();
+            var lookupTable= new Dictionary<char, int>();
             // this implementation assumes the 5's-10s pattern will repeat when/if the alphabet changes.
-            int[] vals = { 1, 5, 10, 50, 100, 500, 1000 };
+            int[] vals =         {  1,   5,  10,  50,  100, 500, 1000 };
             numerals = new char[]{ 'I', 'V', 'X', 'L', 'C', 'D', 'M' };
             // build the base value lookup table lt
-            for (int i = 0; i < vals.Length; i++) lt.Add(numerals[i], vals[i]);
-            return lt;
+            for (int i = 0; i < vals.Length; i++) lookupTable.Add(numerals[i], vals[i]);
+            return lookupTable;
         }
 
         private static string MakeNumberParser(char[] N)

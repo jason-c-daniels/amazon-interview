@@ -82,8 +82,8 @@ namespace amazon
 
         private static string MakeNumberParser(char[] N)
         {
-            // technically we should use stringbuilder for this... it's better performing.
-            // one item you'll notice different in the regex pattern is it's very flat, and only uses alternation within the optional groups.
+            // one item you'll notice different in the regex pattern is it's very flat, and only uses 
+            // alternation within the optional groups and only for subtractive forms.
             StringBuilder sb = new StringBuilder();// re = "";
             sb.Append("^");
             for (int i= N.Length-1; i>=0;i--)

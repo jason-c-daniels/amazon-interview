@@ -61,7 +61,7 @@ namespace amazon.Tests
         [InlineData("XXXVI", 36)]
         [InlineData("XXXVII", 37)]
         [InlineData("XXXVIII", 38)]
-        [InlineData("XXXIX", 39)] // FAILS -- need to rework the regex
+        [InlineData("XXXIX", 39)] 
         [InlineData("XL", 40)]
         [InlineData("XLI", 41)]
         [InlineData("XLII", 42)]
@@ -111,7 +111,7 @@ namespace amazon.Tests
         [InlineData("LXXXVI", 86)]
         [InlineData("LXXXVII", 87)]
         [InlineData("LXXXVIII", 88)]
-        [InlineData("LXXXIX", 89)] // FAILS -- need to rework the regex
+        [InlineData("LXXXIX", 89)] 
         [InlineData("XC", 90)]
         [InlineData("XCI", 91)]
         [InlineData("XCII", 92)]

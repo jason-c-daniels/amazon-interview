@@ -139,6 +139,8 @@ namespace amazon.Tests
         [InlineData("IxianDevice")]
         [InlineData("BillShakyspear")]
         [InlineData(null)]
+        [InlineData("MMMCMXIIM")]
+        [InlineData("XIM")]
         public void TestBadRomanNumerals(string numeral)
         {
             Assert.Throws<InvalidRomanNumeralException>(()=>sol.FromRoman(numeral));

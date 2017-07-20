@@ -36,7 +36,8 @@ namespace amazon
             var numeralToValueTable =BuildLookupTable(out baseNumerals);
 
             string expr = MakeNumberParser(baseNumerals);
-            Regex regex = new Regex(expr, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            // by using explicit and named captures we prevent re-evaluating the same source numeral sequences.
+            Regex regex = new Regex(expr, RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture);
             if (string.IsNullOrWhiteSpace(rn) || !regex.IsMatch(rn)) throw new Exception("Invalid Roman Numeral"); //TODO: localize this text.
 
             MatchCollection mc = regex.Matches(rn);
@@ -87,15 +88,15 @@ namespace amazon
             {
                 if (i==0)
                     //< ones only occur in sequence up to 3
-                    re += string.Format("({0}{{1,3}})?", N[0]); 
+                    re += string.Format("(?<{0}>{0}{{1,3}})?", N[0]); 
                 else if (i % 2 == 0)
-                    // captures CMM,MCM, MMCM and other subtractive formats
+                    // captures CMM,MCM, MMMCM and other subtractive formats (yes it treats two separate terms as one, MMM + CM, they sum up the same, so this is safe.)
                     // if we can stack more than 3, we will need to refactor this regex template. 
                     // come up with a way of programmatically come up with the variations.
-                    re += string.Format("({0}{1}{1}?{1}?|{1}{0}{1}{1}?|{1}?{1}{0}{1}|{1}{{1,3}})?", N[i - 2], N[i]); 
+                    re += string.Format("(?<{1}>({0}{1}{{1,3}}|{1}{0}{1}{{1,2}}|({1}{{1,3}}({0}{1})?)))?", N[i - 2], N[i]);
                 else if (i % 2 == 1)
                     // fives based subtractive
-                    re += string.Format("({0}?{1}{{1,1}})?", N[i - 1], N[i]);
+                    re += string.Format("(?<{1}>{0}?{1}{{1,1}})?", N[i - 1], N[i]);
             }
 
             return "^" +re+"$";

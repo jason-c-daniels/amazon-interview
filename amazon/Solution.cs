@@ -32,12 +32,8 @@ namespace amazon
         {
             rn = rn.ToUpperInvariant();
             int sum = 0;
-            // this implementation assumes the 5's-10s pattern will repeat when/if the alphabet changes.
-            int[] vals=       { 1,    5,  10,  50,  100, 500, 1000 };
-            char[] numerals = { 'I', 'V', 'X', 'L', 'C', 'D', 'M' };
-            var lt = new Dictionary<char, int>();
-            // build the base value lookup table lt
-            for (int i = 0; i < vals.Length; i++) lt.Add(numerals[i], vals[i]);
+            char[] numerals;
+            var lt=BuildLookupTable(out numerals);
 
             string re = MakeNumberParser(numerals);
             Regex regex = new Regex(re, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -49,15 +45,18 @@ namespace amazon
                 for (int gIdx = 1; gIdx < m.Groups.Count; gIdx++)
                 {
                     var v = m.Groups[gIdx].Value;
-                    switch(v.Length)
+                    switch (v.Length)
                     {
-                        case 0: /*skip the item*/break;
+                        case 0: /*skip the item, group with no matches. safe to ignore.*/ break;
                         case 1: sum += lt[v[0]]; break;
                         default: // subtractive or just stacked, handles an arbitrary number of numerals
                             {
                                 var vv = v.ToCharArray().ToList();
+                                // sort acending according to the lookup table.
                                 vv.Sort(new Comparison<char>((l, r) => lt[l] - lt[r]));
+                                // subtract/add the first numeral.
                                 sum += (lt[vv[0]] < lt[vv[1]]) ? -lt[vv[0]] : lt[vv[0]];
+                                // add the remaining numerals
                                 sum += lt[vv[1]] * (vv.Count - 1);
                             }
                             break;
@@ -67,16 +66,35 @@ namespace amazon
             return sum;
         }
 
-        public string MakeNumberParser(char[] N)
+        private static Dictionary<char, int> BuildLookupTable(out char[] numerals)
         {
+            var lt= new Dictionary<char, int>();
+            // this implementation assumes the 5's-10s pattern will repeat when/if the alphabet changes.
+            int[] vals = { 1, 5, 10, 50, 100, 500, 1000 };
+            numerals = new char[]{ 'I', 'V', 'X', 'L', 'C', 'D', 'M' };
+            // build the base value lookup table lt
+            for (int i = 0; i < vals.Length; i++) lt.Add(numerals[i], vals[i]);
+            return lt;
+        }
+
+        private static string MakeNumberParser(char[] N)
+        {
+            // technically we should use stringbuilder for this... it's better performing.
             // one item you'll notice different in the regex pattern is it's very flat, and only uses alternation within the optional groups.
             string re = "";
             for (int i= N.Length-1; i>=0;i--)
             {
-                if (i==0) re += string.Format("({0}{{1,3}})?", N[0]); //< ones only occur in sequence up to 3
-                // if we can stack more than 3, we will need to refactor this regex template. come up with a way of programmatically come up with the variations.
-                else if (i % 2 == 0) re += string.Format("({0}{1}{1}?{1}?|{1}{0}{1}{1}?|{1}?{1}{0}{1}|{1}{{1,3}})?", N[i - 2], N[i]); // capture CMM,MCM, and CM format subtractive
-                else if (i % 2 == 1) re += string.Format("({0}{1}|{1}{{1,1}})?", N[i - 1], N[i]);
+                if (i==0)
+                    //< ones only occur in sequence up to 3
+                    re += string.Format("({0}{{1,3}})?", N[0]); 
+                else if (i % 2 == 0)
+                    // captures CMM,MCM, MMCM and other subtractive formats
+                    // if we can stack more than 3, we will need to refactor this regex template. 
+                    // come up with a way of programmatically come up with the variations.
+                    re += string.Format("({0}{1}{1}?{1}?|{1}{0}{1}{1}?|{1}?{1}{0}{1}|{1}{{1,3}})?", N[i - 2], N[i]); 
+                else if (i % 2 == 1)
+                    // fives based subtractive
+                    re += string.Format("({0}?{1}{{1,1}})?", N[i - 1], N[i]);
             }
 
             return "^" +re+"$";

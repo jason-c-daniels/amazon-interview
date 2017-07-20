@@ -33,7 +33,7 @@ namespace amazon
             rn = rn.ToUpperInvariant();
             int sum = 0;
             char[] baseNumerals;
-            var numeralValue=BuildLookupTable(out baseNumerals);
+            var numeralToValueTable =BuildLookupTable(out baseNumerals);
 
             string expr = MakeNumberParser(baseNumerals);
             Regex regex = new Regex(expr, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -48,17 +48,17 @@ namespace amazon
                     switch (v.Length)
                     {
                         case 0: /*skip the item, group with no matches. safe to ignore.*/ break;
-                        case 1: sum += numeralValue[v[0]]; break;
+                        case 1: sum += numeralToValueTable [v[0]]; break;
                         default: // subtractive or just stacked, handles an arbitrary number of numerals
                             {
                                 var numerals = v.ToCharArray().ToList();
                                 // sort acending according to the lookup table.
-                                numerals.Sort(new Comparison<char>((l, r) => numeralValue[l] - numeralValue[r]));
+                                numerals.Sort(new Comparison<char>((l, r) => numeralToValueTable [l] - numeralToValueTable [r]));
                                 // subtract/add the first numeral.
                                 // if the first item is less than the second it's a subtraction. Otherwise it's an add.
-                                sum += (numeralValue[numerals[0]] < numeralValue[numerals[1]]) ? -numeralValue[numerals[0]] : numeralValue[numerals[0]];
+                                sum += (numeralToValueTable [numerals[0]] < numeralToValueTable [numerals[1]]) ? -numeralToValueTable [numerals[0]] : numeralToValueTable [numerals[0]];
                                 // add the remaining numerals
-                                sum += numeralValue[numerals[1]] * (numerals.Count - 1);
+                                sum += numeralToValueTable [numerals[1]] * (numerals.Count - 1);
                             }
                             break;
                     }

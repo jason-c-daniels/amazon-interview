@@ -127,5 +127,22 @@ namespace amazon.Tests
         {
             Assert.Equal(expected, sol.FromRoman(numeral));
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("\t")]
+        [InlineData(" ")]
+        [InlineData("VV")]
+        [InlineData("LL")]
+        [InlineData("DD")]
+        [InlineData("ZZ Top")]
+        [InlineData("IxianDevice")]
+        [InlineData("BillShakyspear")]
+        [InlineData(null)]
+        public void TestBadRomanNumerals(string numeral)
+        {
+            Assert.Throws<InvalidRomanNumeralException>(()=>sol.FromRoman(numeral));
+        }
+
     }
 }

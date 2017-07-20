@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace amazon
 {
-   public class Solution
+    public class Solution
     {
         /** This was from my phone interview with Amazon... 
            Parse a roman numeral in an extensible manner. 
@@ -30,6 +30,7 @@ namespace amazon
         */
         public int FromRoman(string rn)
         {
+            if (string.IsNullOrWhiteSpace(rn)) throw new InvalidRomanNumeralException("Empty text is not a valid roman numeral"); //TODO: localize this text.
             rn = rn.ToUpperInvariant();
             int sum = 0;
             char[] baseNumerals;
@@ -38,7 +39,7 @@ namespace amazon
             string expr = MakeNumberParser(baseNumerals);
             // by using explicit and named captures we prevent re-evaluating the same source numeral sequences.
             Regex regex = new Regex(expr, RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-            if (string.IsNullOrWhiteSpace(rn) || !regex.IsMatch(rn)) throw new Exception("Invalid Roman Numeral"); //TODO: localize this text.
+            if (!regex.IsMatch(rn)) throw new InvalidRomanNumeralException(rn+" is not a valid roman numeral"); //TODO: localize this text.
 
             MatchCollection mc = regex.Matches(rn);
             foreach (Match m in mc)
